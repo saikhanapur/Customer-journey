@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Security: Customer Journey Intelligence</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #0F172A;
+            --accent: #3B82F6;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --success: #10B981;
+            --purple: #8B5CF6;
+            --bg: #FFFFFF;
+            --surface: #F8FAFC;
+            --text: #1E293B;
+            --text-light: #64748B;
+            --border: #E2E8F0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        /* Hero - North Star */
+        .hero {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #FFFFFF 0%, #F0F9FF 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        .hero-content {
+            max-width: 1200px;
+            text-align: center;
+        }
+        
+        .north-star {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+        
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 2rem;
+            line-height: 1.1;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+        
+        .hero-metric {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
+        
+        .hero-metric-value {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hero-metric-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+        
+        .value-red { color: var(--danger); }
+        .value-warning { color: var(--warning); }
+        .value-success { color: var(--success); }
+        
+        /* Navigation */
+        .nav {
+            position: sticky;
+            top: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        
+        .nav-link:hover {
+            color: var(--accent);
+        }
+        
+        /* Section */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .section-header {
+            margin-bottom: 4rem;
+        }
+        
+        .section-tag {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .section-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+        
+        .section-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-light);
+        }
+        
+        /* Journey Map - Interactive */
+        .journey-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 3rem 0;
+        }
+        
+        .journey-stage {
+            background: white;
+            padding: 2rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .journey-stage:hover {
+            background: var(--surface);
+            transform: scale(1.02);
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        }
+        
+        .stage-number {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stage-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+        
+        .stage-score {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+        
+        .score-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1rem;
+        }
+        
+        .score-1 { background: #FEE2E2; color: var(--danger); }
+        .score-2 { background: #FFEDD5; color: var(--warning); }
+        .score-3 { background: #FEF3C7; color: #D97706; }
+        .score-4 { background: #D1FAE5; color: var(--success); }
+        
+        .stage-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .stage-tag {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .tag-gap { background: #FEE2E2; color: var(--danger); }
+        .tag-risk { background: #FFEDD5; color: var(--warning); }
+        .tag-soap { background: #DBEAFE; color: var(--accent); }
+        
+        /* Stage Detail Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 1200px;
+            width: 100%;
+            padding: 3rem;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: var(--surface);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .modal-header {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+        
+        .modal-score-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            background: var(--surface);
+            border-radius: 12px;
+        }
+        
+        .score-circle-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.5rem;
+        }
+        
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .modal-section {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .modal-section.danger {
+            border-left-color: var(--danger);
+        }
+        
+        .modal-section.success {
+            border-left-color: var(--success);
+        }
+        
+        .modal-section h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .modal-section ul {
+            list-style: none;
+        }
+        
+        .modal-section li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .modal-section li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: 700;
+        }
+        
+        .action-button {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59,130,246,0.3);
+        }
+        
+        .action-button.danger {
+            background: var(--danger);
+        }
+        
+        /* Insights Panel */
+        .insights-panel {
+            background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
+            padding: 3rem;
+            border-radius: 16px;
+            margin: 3rem 0;
+        }
+        
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .insight-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .insight-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .insight-card.critical {
+            border-left-color: var(--danger);
+        }
+        
+        /* Action Plan */
+        .action-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        
+        .action-item {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            border: 2px solid var(--border);
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 2rem;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .action-item:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 24px rgba(59,130,246,0.1);
+        }
+        
+        .action-priority {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: white;
+        }
+        
+        .priority-1 { background: var(--danger); }
+        .priority-2 { background: var(--warning); }
+        .priority-3 { background: var(--success); }
+        
+        .action-content h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .action-meta {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        
+        .action-week {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border-radius: 8px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        
+        .action-status {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-ready { background: #D1FAE5; color: var(--success); }
+        .status-blocked { background: #FEE2E2; color: var(--danger); }
+        
+        /* Filters */
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .filter-button {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .filter-button:hover {
+            border-color: var(--accent);
+            background: var(--surface);
+        }
+        
+        .filter-button.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .journey-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .journey-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .modal-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-item {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="north-star">NORTH STAR MISSION</div>
+            <h1>Become as Easy to Work With<br>as a Modern Utility Company</h1>
+            <p style="font-size: 1.25rem; color: var(--text-light); max-width: 800px; margin: 0 auto;">
+                Transparent self-service from enquiry to invoice. Minimal friction. Proactive communication. Real-time visibility.
+            </p>
+            
+            <div class="hero-metrics">
+                <div class="hero-metric">
+                    <div class="hero-metric-value value-red">2.1/5</div>
+                    <div class="hero-metric-label">Current Journey Maturity</div>
+                </div>
+                <div class="hero-metric">
+                    <div class="hero-metric-value value-warning">26</div>
+                    <div class="hero-metric-label">Customer Touchpoints</div>
+                </div>
+                <div class="hero-metric">
+                    <div class="hero-metric-value value-red">8</div>
+                    <div class="hero-metric-label">Critical Gaps</div>
+                </div>
+                <div class="hero-metric">
+                    <div class="hero-metric-value value-success">90</div>
+                    <div class="hero-metric-label">Days to Transform</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div style="font-weight: 800; font-size: 1.1rem;">First Security</div>
+        <div class="nav-links">
+            <a href="#journey" class="nav-link">Journey Map</a>
+            <a href="#insights" class="nav-link">AI Insights</a>
+            <a href="#actions" class="nav-link">Action Plan</a>
+        </div>
+    </nav>
+
+    <!-- Journey Map Section -->
+    <section id="journey" class="section">
+        <div class="section-header">
+            <div class="section-tag">INTERACTIVE JOURNEY MAP</div>
+            <h2 class="section-title">26 Customer Touchpoints Analyzed</h2>
+            <p class="section-subtitle">Click any stage to reveal gaps, risks, SOAP coverage, and recommended actions</p>
+        </div>
+        
+        <div class="filter-bar">
+            <button class="filter-button active" onclick="filterStages('all')">All Stages</button>
+            <button class="filter-button" onclick="filterStages('critical')">Critical Gaps Only</button>
+            <button class="filter-button" onclick="filterStages('soap')">SOAP Covered</button>
+            <button class="filter-button" onclick="filterStages('nosoapd')">No SOAP Coverage</button>
+        </div>
+        
+        <div class="journey-grid" id="journeyGrid"></div>
+    </section>
+
+    <!-- AI Insights Section -->
+    <section id="insights" class="section">
+        <div class="section-header">
+            <div class="section-tag">AI-POWERED ANALYSIS</div>
+            <h2 class="section-title">Strategic Intelligence</h2>
+            <p class="section-subtitle">Critical patterns, risks, and opportunities identified</p>
+        </div>
+        
+        <div class="insights-panel">
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">🎯 Key Strategic Findings</h3>
+            <div class="insight-grid">
+                <div class="insight-card critical">
+                    <h3>Customer Blindness</h3>
+                    <p>No portal means customers cannot self-serve. They don't see what they're signed up for, what they're being charged, or when services occur. Creates dependency and friction.</p>
+                    <div style="margin-top: 1rem; font-weight: 700; color: var(--danger);">
+                        Impact: High call volume, billing disputes, poor experience
+                    </div>
+                </div>
+                
+                <div class="insight-card critical">
+                    <h3>Expectation Mismatch</h3>
+                    <p>"Parts turn up after we've started" — no formal sign-off on service model or billing before launch. Scope and delivery mismatches discovered too late.</p>
+                    <div style="margin-top: 1rem; font-weight: 700; color: var(--danger);">
+                        Impact: Revenue leakage, customer dissatisfaction, operational chaos
+                    </div>
+                </div>
+                
+                <div class="insight-card critical">
+                    <h3>Payment Friction</h3>
+                    <p>"One way to pay" — invoice only. No subscription, prepay, or card options. Customers with different payment preferences cannot work with us.</p>
+                    <div style="margin-top: 1rem; font-weight: 700; color: var(--danger);">
+                        Impact: Cash flow issues, lost deals, competitive disadvantage
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <h3>Field Intelligence Gap</h3>
+                    <p>Guards experience customer issues, scope creep, and safety concerns that never reach operations. "On-ground reality" invisible to management.</p>
+                    <div style="margin-top: 1rem; font-weight: 700; color: var(--warning);">
+                        Impact: Missed early warnings, safety risks, unbilled scope creep
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <h3>No Proactive Retention</h3>
+                    <p>No NPS, no churn scoring, no account tiering. Discover customer dissatisfaction when they don't renew — too late to fix.</p>
+                    <div style="margin-top: 1rem; font-weight: 700; color: var(--warning);">
+                        Impact: Reactive churn management, lost growth opportunities
+                    </div>
+                </div>
+                
+                <div class="insight-card">
+                    <h3>D-Day is Just Day 2</h3>
+                    <p>First day of service has no protocol — same as any other day. Miss opportunity to set expectations, build confidence, and fix issues early.</p>
+                    <div style="margin-top: 1rem; font-weight: 700; color: var(--warning);">
+                        Impact: Poor first impressions, missed early problem detection
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Action Plan Section -->
+    <section id="actions" class="section">
+        <div class="section-header">
+            <div class="section-tag">90-DAY TRANSFORMATION</div>
+            <h2 class="section-title">Prioritized Action Plan</h2>
+            <p class="section-subtitle">10 initiatives sequenced for maximum impact</p>
+        </div>
+        
+        <div class="action-grid" id="actionGrid"></div>
+    </section>
+
+    <!-- Stage Detail Modal -->
+    <div class="modal" id="stageModal">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <script>
+        // Journey data with full detail
+        const journeyData = [
+            {
+                id: 1,
+                phase: 'Acquire',
+                name: 'Customer Enquiry',
+                score: 2,
+                soapCovered: true,
+                soapInitiative: 'Pre-Sales Process, CRM',
+                currentState: 'Ad-hoc phone/email; inconsistent CRM capture',
+                desiredState: 'All inquiries via web form → HubSpot; 4-hour SLA',
+                gaps: ['No web form on website', 'Phone/email bypass CRM', 'No response SLA tracking'],
+                risks: ['Lost leads', 'Inconsistent follow-up', 'No lead source analytics'],
+                actions: ['Build web inquiry form with HubSpot integration', 'Define 4-hour response SLA', 'Train team on CRM capture'],
+                owner: 'Sales Lead',
+                systems: 'HubSpot CRM, Web Form'
+            },
+            {
+                id: 2,
+                phase: 'Acquire',
+                name: 'Outbound Sales',
+                score: 3,
+                soapCovered: true,
+                soapInitiative: 'Pre-Sales Process',
+                currentState: 'Manual prospecting; LinkedIn not integrated',
+                desiredState: 'Automated lead capture from all channels with CRM integration',
+                gaps: ['Social/trade leads lost', 'No systematic capture'],
+                risks: ['Missed opportunities', 'No pipeline visibility'],
+                actions: ['Integrate LinkedIn Sales Navigator with HubSpot', 'Create lead source taxonomy'],
+                owner: 'Sales Lead',
+                systems: 'HubSpot CRM, LinkedIn'
+            },
+            {
+                id: 3,
+                phase: 'Acquire',
+                name: 'Tender/RFP',
+                score: 3,
+                soapCovered: true,
+                soapInitiative: 'Pre-Sales Process',
+                currentState: 'Tracked in CRM; loss reasons not systematically captured',
+                desiredState: 'Mandatory loss analysis with feedback loop',
+                gaps: ['Losing on CX not price', 'No pattern analysis'],
+                risks: ['Repeat same mistakes', 'Miss competitive intelligence'],
+                actions: ['Implement mandatory tender loss review', 'Analyze non-price loss patterns'],
+                owner: 'Sales Lead',
+                systems: 'HubSpot CRM, OneDrive'
+            },
+            {
+                id: 4,
+                phase: 'Acquire',
+                name: 'Customer Referral',
+                score: 1,
+                soapCovered: false,
+                soapInitiative: 'None (Gap)',
+                currentState: 'No program; referrals handled ad-hoc',
+                desiredState: 'Formal referral program with incentives',
+                gaps: ['Untapped growth channel', 'No referrer tracking'],
+                risks: ['Miss high-conversion leads', 'No referrer appreciation'],
+                actions: ['Design referral program (FY27)', 'Track referral source in CRM'],
+                owner: 'CX Lead',
+                systems: 'HubSpot CRM'
+            },
+            {
+                id: 5,
+                phase: 'Acquire',
+                name: 'Urgent Work (NOC)',
+                score: 2,
+                soapCovered: true,
+                soapInitiative: 'Pre-Sales Process',
+                currentState: 'Handled as one-off transaction',
+                desiredState: 'Treated as acquisition funnel with follow-up workflow',
+                gaps: ['Low conversion to ongoing customer'],
+                risks: ['Revenue left on table', 'Transactional relationship'],
+                actions: ['Build urgent work → ongoing customer workflow', 'Track conversion rate'],
+                owner: 'NOC / Sales',
+                systems: 'HubSpot CRM, Responda'
+            },
+            {
+                id: 6,
+                phase: 'Acquire',
+                name: 'M&A / Transition',
+                score: 3,
+                soapCovered: true,
+                soapInitiative: 'Customer Journey Map',
+                currentState: 'Inconsistent; CSL example was good',
+                desiredState: 'Standard Welcome Pack for all inherited customers',
+                gaps: ['Customer confusion during transition'],
+                risks: ['Churn during handover', 'Brand confusion'],
+                actions: ['Create "Welcome to First Security" template', 'Test with next acquisition'],
+                owner: 'Sales / Ops',
+                systems: 'HubSpot CRM, D365'
+            },
+            {
+                id: 7,
+                phase: 'Price',
+                name: 'Scope of Work / Site Visit',
+                score: 2,
+                soapCovered: true,
+                soapInitiative: 'Pre-Sales Process',
+                currentState: 'Manual; inconsistent documentation',
+                desiredState: 'Standardized checklist in CRM with photo evidence',
+                gaps: ['Incomplete risk assessments'],
+                risks: ['Safety issues missed', 'Scope underestimated'],
+                actions: ['Build site visit checklist template', 'Require photo documentation'],
+                owner: 'Ops Manager',
+                systems: 'HubSpot CRM, OneDrive'
+            },
+            {
+                id: 8,
+                phase: 'Price',
+                name: 'End-to-End Expectation Check',
+                score: 1,
+                soapCovered: true,
+                soapInitiative: 'Quote to Contract',
+                currentState: 'Does not exist; mismatches discovered post-launch',
+                desiredState: 'Mandatory 3-stage sign-off (Quote, Onboarding, Reviews)',
+                gaps: ['Parts turn up after we start', 'No formal alignment'],
+                risks: ['Scope/billing disputes', 'Operational surprises', 'Revenue leakage'],
+                actions: ['Build 3-stage expectation checklist', 'Mandatory sign-off at Quote and Onboarding'],
+                owner: 'Sales + Ops + Finance',
+                systems: 'HubSpot CRM, Checklist'
+            },
+            {
+                id: 9,
+                phase: 'Price',
+                name: 'Pricing Tool & Quote',
+                score: 4,
+                soapCovered: true,
+                soapInitiative: 'Pricing Tool',
+                currentState: 'Pricing Tool being deployed',
+                desiredState: 'Consistent quoting with margin optimization',
+                gaps: ['Tool adoption challenges'],
+                risks: ['Approval delays', 'Inconsistent pricing'],
+                actions: ['Monitor tool adoption', 'Train all sales staff'],
+                owner: 'Sales Lead',
+                systems: 'Pricing Tool, HubSpot'
+            },
+            {
+                id: 10,
+                phase: 'Price',
+                name: 'Quote Delivery',
+                score: 3,
+                soapCovered: true,
+                soapInitiative: 'Quote to Contract',
+                currentState: 'Email-based; manual tracking',
+                desiredState: 'E-signature with automated acceptance workflow',
+                gaps: ['Acceptance tracking manual'],
+                risks: ['Lost quotes', 'Slow conversion'],
+                actions: ['Integrate DocuSign or PandaDoc', 'Automate quote acceptance workflow'],
+                owner: 'Sales Lead',
+                systems: 'HubSpot, E-signature'
+            },
+            {
+                id: 11,
+                phase: 'Convert',
+                name: 'Contract Conversion',
+                score: 3,
+                soapCovered: true,
+                soapInitiative: 'Document Management, CRM',
+                currentState: 'Manual; OneDrive storage',
+                desiredState: 'OneDrive source of truth + HubSpot metadata link',
+                gaps: ['Embed vs link decision needed'],
+                risks: ['Contract access issues', 'Version control'],
+                actions: ['Decide OneDrive linking strategy', 'Extract key contract metadata to CRM'],
+                owner: 'Sales / Ops',
+                systems: 'OneDrive, HubSpot'
+            },
+            {
+                id: 12,
+                phase: 'Convert',
+                name: 'Customer Onboarding',
+                score: 1,
+                soapCovered: true,
+                soapInitiative: 'Customer Journey Map',
+                currentState: 'Ad-hoc; no Welcome Pack; no portal',
+                desiredState: 'Automated Welcome Pack + portal credentials + billing setup',
+                gaps: ['No standard onboarding', 'No portal exists', 'No Welcome Pack'],
+                risks: ['Customer confusion', 'Poor first impression', 'Billing setup errors'],
+                actions: ['Create Welcome Pack template', 'Build automated onboarding workflow', 'Define portal access process'],
+                owner: 'CX Lead / Ops',
+                systems: 'HubSpot, Customer Portal, D365'
+            },
+            {
+                id: 13,
+                phase: 'Convert',
+                name: 'Site Setup',
+                score: 2,
+                soapCovered: true,
+                soapInitiative: 'Quote to Contract',
+                currentState: 'Manual barcoding; inconsistent induction',
+                desiredState: 'Automated checklist with training records logged',
+                gaps: ['Delays', 'Induction completeness varies'],
+                risks: ['Compliance issues', 'Safety gaps', 'Launch delays'],
+                actions: ['Integrate site setup checklist into HubSpot', 'Log training records systematically'],
+                owner: 'Ops Manager',
+                systems: 'Welfare First, Deputy, HubSpot'
+            },
+            {
+                id: 14,
+                phase: 'Convert',
+                name: 'Billing & Payments Setup',
+                score: 1,
+                soapCovered: true,
+                soapInitiative: 'Revenue Assurance',
+                currentState: 'Invoice-only; no prepay/subscription options',
+                desiredState: 'Credit card advance, subscription, invoice options',
+                gaps: ['One way to pay', 'No payment flexibility'],
+                risks: ['Cash flow issues', 'Lost customers', 'Payment disputes'],
+                actions: ['Implement credit card payment gateway', 'Build subscription billing model', 'Create prepay options'],
+                owner: 'Finance Lead',
+                systems: 'D365, Payment Gateway, HubSpot'
+            },
+            {
+                id: 15,
+                phase: 'Deliver',
+                name: 'Day-1 Service (D-Day)',
+                score: 1,
+                soapCovered: true,
+                soapInitiative: 'Quote to Contract',
+                currentState: 'No standard protocol; same as Day 2',
+                desiredState: 'Tiered D-Day playbook (VIP/Standard/Casual)',
+                gaps: ['First impressions lost', 'No launch ritual'],
+                risks: ['Issues not caught early', 'Customer anxiety', 'Missed expectation setting'],
+                actions: ['Create tiered D-Day protocol', 'Define CSM presence requirements', 'Build end-of-day review template'],
+                owner: 'CSM / Ops',
+                systems: 'HubSpot, Customer Portal'
+            },
+            {
+                id: 16,
+                phase: 'Deliver',
+                name: 'Ordering Work',
+                score: 2,
+                soapCovered: true,
+                soapInitiative: 'Pre-Sales, Customer Reporting',
+                currentState: 'Responda (alarm response only); phone/email bypass CRM',
+                desiredState: 'Responda expanded; portal order form; CRM capture',
+                gaps: ['No self-serve for guards/patrols'],
+                risks: ['Manual workload', 'Order tracking gaps', 'Revenue leakage'],
+                actions: ['Expand Responda to casual guards + patrols', 'Build portal order form', 'Ensure all orders flow to CRM'],
+                owner: 'NOC / Tony V',
+                systems: 'Responda, Customer Portal, HubSpot'
+            },
+            {
+                id: 17,
+                phase: 'Deliver',
+                name: 'Service Visibility & Reporting',
+                score: 3,
+                soapCovered: true,
+                soapInitiative: 'Customer Reporting',
+                currentState: 'Tony Smith team; portal exists but limited',
+                desiredState: 'Unified "My First Security" portal with 24/7 self-service',
+                gaps: ['Not all customers have access', 'Limited functionality'],
+                risks: ['Call volume', 'Customer dissatisfaction', 'Manual report generation'],
+                actions: ['Expand portal to all customers', 'Add rosters, incidents, invoices, contracts', 'Build self-service KPI dashboards'],
+                owner: 'Tony Smith / Sai',
+                systems: 'Customer Portal, Power BI, Welfare First'
+            },
+            {
+                id: 18,
+                phase: 'Care',
+                name: 'Customer Care',
+                score: 2,
+                soapCovered: true,
+                soapInitiative: 'CRM, Customer Journey',
+                currentState: 'CRM cases; credit notes lack reason codes',
+                desiredState: 'Structured complaint handling with credit-note categorization',
+                gaps: ['No pattern analysis', 'Credit note reasons missing'],
+                risks: ['Repeat issues', 'No trend detection', 'Revenue leakage'],
+                actions: ['Implement credit-note reason codes in D365', 'Sync to HubSpot for analysis', 'Build complaint pattern reports'],
+                owner: 'CX Lead',
+                systems: 'HubSpot Service Hub, D365'
+            },
+            {
+                id: 19,
+                phase: 'Care',
+                name: 'NPS / Feedback',
+                score: 1,
+                soapCovered: false,
+                soapInitiative: 'None (Gap)',
+                currentState: 'Done twice (not pretty); no current program',
+                desiredState: 'Ask Nicely deployment with <7 score escalation; NPS 70+ target',
+                gaps: ['No systematic feedback', 'No churn early warning'],
+                risks: ['Blind to customer sentiment', 'Discover dissatisfaction too late'],
+                actions: ['Deploy Ask Nicely or HubSpot Feedback', 'Automate <7 score escalation workflow', 'Set NPS 70+ target'],
+                owner: 'CX Lead',
+                systems: 'Ask Nicely, HubSpot'
+            },
+            {
+                id: 20,
+                phase: 'Care',
+                name: 'Variation to Contract',
+                score: 2,
+                soapCovered: true,
+                soapInitiative: 'Quote to Contract',
+                currentState: 'Ad-hoc; revenue leakage',
+                desiredState: 'HubSpot workflow with scope vs volume distinction',
+                gaps: ['Undocumented scope creep'],
+                risks: ['Revenue leakage', 'Customer disputes', 'Margin erosion'],
+                actions: ['Build variation workflow in HubSpot', 'Distinguish scope vs volume changes', 'Automate pricing impact calculation'],
+                owner: 'Sales / Ops',
+                systems: 'HubSpot, Pricing Tool, OneDrive'
+            },
+            {
+                id: 21,
+                phase: 'Grow',
+                name: 'Upselling',
+                score: 2,
+                soapCovered: true,
+                soapInitiative: 'Account Management',
+                currentState: 'Opportunistic; casual→permanent conversion weak',
+                desiredState: 'Automated triggers with Account Manager tasks',
+                gaps: ['Revenue left on table', 'No systematic conversion'],
+                risks: ['Missed upsell opportunities', 'Competitor moves in'],
+                actions: ['Build casual→permanent conversion workflow', 'Automate upsell triggers based on usage', 'Track conversion rates'],
+                owner: 'Sales / Account Manager',
+                systems: 'HubSpot, AI insight layer'
+            },
+            {
+                id: 22,
+                phase: 'Grow',
+                name: 'Retention & Churn Risk',
+                score: 1,
+                soapCovered: true,
+                soapInitiative: 'Account Management',
+                currentState: 'Reactive; no tiering',
+                desiredState: 'Account tiering with predictive churn model and health checks',
+                gaps: ['No proactive retention', 'No churn indicators'],
+                risks: ['Discover churn too late', 'No intervention plan', 'Revenue loss'],
+                actions: ['Define account tiers (VIP/Standard/At-Risk)', 'Build churn risk scoring', 'Create health check cadence'],
+                owner: 'Sales Lead / CX',
+                systems: 'HubSpot, AI insight layer'
+            },
+            {
+                id: 23,
+                phase: 'Grow',
+                name: 'Contract Renewal',
+                score: 2,
+                soapCovered: true,
+                soapInitiative: 'Account Management',
+                currentState: 'Reactive; some 90-day alerts',
+                desiredState: 'Automated 90-day trigger with service+pricing review mandatory',
+                gaps: ['Customer may re-tender without notice'],
+                risks: ['Lose renewals', 'Price competition', 'No relationship leverage'],
+                actions: ['Build 90-day automated renewal workflow', 'Mandate service review', 'Integrate with pricing tool for renewal pricing'],
+                owner: 'Sales / Account Manager',
+                systems: 'HubSpot, Pricing Tool'
+            },
+            {
+                id: 24,
+                phase: 'Exit',
+                name: 'Service Suspension & Offboarding',
+                score: 1,
+                soapCovered: true,
+                soapInitiative: 'Revenue Assurance',
+                currentState: 'Ad-hoc; no Cheerio Pack',
+                desiredState: 'Suspension policy defined with farewell template created',
+                gaps: ['No formal process', 'Assets not recovered'],
+                risks: ['Poor final impression', 'Asset loss', 'Unpaid invoices'],
+                actions: ['Create suspension policy and thresholds', 'Design Cheerio Pack template', 'Build asset return checklist'],
+                owner: 'Finance / CX',
+                systems: 'HubSpot, D365, Welfare First'
+            },
+            {
+                id: 25,
+                phase: 'Parallel',
+                name: 'HSE & Field Feedback',
+                score: 1,
+                soapCovered: false,
+                soapInitiative: 'None (Gap)',
+                currentState: 'Incident reports in Welfare First; no ops feedback loop',
+                desiredState: 'Structured field→ops feedback with scope creep detection',
+                gaps: ['On-ground reality invisible', 'No feedback mechanism'],
+                risks: ['Safety issues escalate', 'Scope creep undetected', 'Guard concerns ignored'],
+                actions: ['Build field feedback form in Welfare First', 'Create ops escalation workflow', 'Track scope creep flags'],
+                owner: 'Ops Manager',
+                systems: 'Welfare First, HubSpot'
+            },
+            {
+                id: 26,
+                phase: 'Parallel',
+                name: 'Legal & Commercial Review',
+                score: 1,
+                soapCovered: false,
+                soapInitiative: 'None (Gap)',
+                currentState: 'Reactive; no clear process',
+                desiredState: 'Breach response playbook with two-way process',
+                gaps: ['No escalation matrix', 'Reactive only'],
+                risks: ['Legal exposure', 'Unmanaged conflicts', 'No resolution path'],
+                actions: ['Create breach response playbook', 'Define escalation matrix', 'Build tracking in HubSpot'],
+                owner: 'Legal Lead',
+                systems: 'HubSpot, OneDrive'
+            }
+        ];
+
+        // Action plan data
+        const actionPlan = [
+            { priority: 1, week: 2, title: 'Finalize Customer Journey Map', owner: 'Jamie/Sai/Tony S', soap: 'Customer Journey Map', status: 'ready' },
+            { priority: 1, week: 3, title: 'Define CRM Scope Matrix', owner: 'Wade/Tony S', soap: 'CRM', status: 'ready' },
+            { priority: 1, week: 4, title: 'Implement End-to-End Expectation Check', owner: 'Ops Lead/Tony V', soap: 'Quote to Contract', status: 'ready' },
+            { priority: 1, week: 5, title: 'Create D-Day Protocol', owner: 'Ops/CSM', soap: 'Day-1 Service', status: 'ready' },
+            { priority: 2, week: 6, title: 'Design "My First Security" Portal MVP', owner: 'Tony S/Sai', soap: 'Customer Reporting', status: 'blocked' },
+            { priority: 2, week: 7, title: 'Document Contract Renewal Process', owner: 'Sales/Ops', soap: 'Contract Renewal', status: 'ready' },
+            { priority: 2, week: 8, title: 'Expand Responda Scope', owner: 'Tony V/Ops', soap: 'Ordering Work', status: 'ready' },
+            { priority: 2, week: 9, title: 'Establish Account Management Tiering', owner: 'Sales/Wade', soap: 'Account Management', status: 'ready' },
+            { priority: 1, week: 10, title: 'Build Subscription Billing', owner: 'Finance/Lisa', soap: 'Billing & Payments', status: 'blocked' },
+            { priority: 1, week: 12, title: 'Deploy NPS/Feedback Tool', owner: 'CX Lead/Tony S', soap: 'Customer Care', status: 'ready' }
+        ];
+
+        // Render journey grid
+        function renderJourney(filter = 'all') {
+            const grid = document.getElementById('journeyGrid');
+            let filteredData = journeyData;
+            
+            if (filter === 'critical') {
+                filteredData = journeyData.filter(s => s.score === 1);
+            } else if (filter === 'soap') {
+                filteredData = journeyData.filter(s => s.soapCovered);
+            } else if (filter === 'nosoap') {
+                filteredData = journeyData.filter(s => !s.soapCovered);
+            }
+            
+            grid.innerHTML = filteredData.map(stage => `
+                <div class="journey-stage" onclick="openModal(${stage.id})">
+                    <div class="stage-number">Stage ${stage.id} · ${stage.phase}</div>
+                    <div class="stage-name">${stage.name}</div>
+                    <div class="stage-score">
+                        <div class="score-circle score-${stage.score}">${stage.score}</div>
+                        <span style="font-size: 0.8rem; color: var(--text-light);">/ 5</span>
+                    </div>
+                    <div class="stage-tags">
+                        ${stage.score === 1 ? '<span class="stage-tag tag-gap">CRITICAL</span>' : ''}
+                        ${stage.soapCovered ? '<span class="stage-tag tag-soap">SOAP</span>' : '<span class="stage-tag tag-risk">NO SOAP</span>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render action plan
+        function renderActions() {
+            const grid = document.getElementById('actionGrid');
+            grid.innerHTML = actionPlan.map(action => `
+                <div class="action-item">
+                    <div class="action-priority priority-${action.priority}">${action.priority}</div>
+                    <div class="action-content">
+                        <h3>${action.title}</h3>
+                        <div class="action-meta">${action.owner} · SOAP: ${action.soap}</div>
+                    </div>
+                    <div class="action-week">Week ${action.week}</div>
+                    <div class="action-status status-${action.status}">
+                        ${action.status === 'ready' ? '✓ Ready' : '⚠ Blocked'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Open modal with stage details
+        function openModal(stageId) {
+            const stage = journeyData.find(s => s.id === stageId);
+            const modal = document.getElementById('stageModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <button class="modal-close" onclick="closeModal()">×</button>
+                <div class="modal-header">
+                    <div style="font-size: 0.85rem; color: var(--text-light); font-weight: 600; margin-bottom: 0.5rem;">
+                        STAGE ${stage.id} · ${stage.phase.toUpperCase()}
+                    </div>
+                    <h2 class="modal-title">${stage.name}</h2>
+                    <div class="modal-score-large">
+                        <div class="score-circle-large score-${stage.score}">${stage.score}</div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.1rem;">Maturity Score</div>
+                            <div style="font-size: 0.9rem; color: var(--text-light);">
+                                ${stage.score === 1 ? 'Critical Gap' : stage.score === 2 ? 'Low Maturity' : stage.score === 3 ? 'Developing' : 'Strong'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-grid">
+                    <div class="modal-section">
+                        <h3>📊 Current State</h3>
+                        <p>${stage.currentState}</p>
+                    </div>
+                    <div class="modal-section success">
+                        <h3>🎯 Desired State</h3>
+                        <p>${stage.desiredState}</p>
+                    </div>
+                </div>
+                
+                <div class="modal-grid">
+                    <div class="modal-section danger">
+                        <h3>⚠️ Critical Gaps</h3>
+                        <ul>
+                            ${stage.gaps.map(gap => `<li>${gap}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="modal-section danger">
+                        <h3>🚨 Business Risks</h3>
+                        <ul>
+                            ${stage.risks.map(risk => `<li>${risk}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="modal-section" style="border-left-color: var(--success);">
+                    <h3>✅ Recommended Actions</h3>
+                    <ul>
+                        ${stage.actions.map(action => `<li>${action}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--border);">
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem;">OWNER</div>
+                        <div style="font-weight: 700;">${stage.owner}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem;">SYSTEMS</div>
+                        <div style="font-weight: 700;">${stage.systems}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem;">SOAP INITIATIVE</div>
+                        <div style="font-weight: 700;">${stage.soapCovered ? stage.soapInitiative : 'None (Gap)'}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.5rem;">PRIORITY</div>
+                        <div style="font-weight: 700; color: ${stage.score === 1 ? 'var(--danger)' : 'var(--warning)'};">
+                            ${stage.score === 1 ? 'CRITICAL - Week 1-4' : stage.score === 2 ? 'HIGH - Week 5-8' : 'MEDIUM - Week 9-12'}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem; text-align: center;">
+                    <button class="action-button ${stage.score === 1 ? 'danger' : ''}" onclick="alert('Export action plan for Stage ${stage.id}')">
+                        📋 Export Action Plan for This Stage
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('stageModal').classList.remove('active');
+        }
+
+        function filterStages(filter) {
+            // Update button states
+            document.querySelectorAll('.filter-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Re-render
+            renderJourney(filter);
+        }
+
+        // Close modal on background click
+        document.getElementById('stageModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Initialize
+        renderJourney();
+        renderActions();
+    </script>
+</body>
+</html>
